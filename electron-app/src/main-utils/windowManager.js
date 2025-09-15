@@ -23,7 +23,7 @@ function createSplash(){
         width: 800,
         height: 300,
         frame: false,
-        alwaysOnTop: true,
+        // alwaysOnTop: true,
         transparent: true,
         center: true,
         webPreferences: {
