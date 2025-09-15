@@ -1,5 +1,5 @@
 const { execSync, spawn } = require("child_process");
-const { app } = require("electron");
+const { app, dialog  } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
@@ -22,56 +22,68 @@ function runPrepareAsync(splash) {
 
     return new Promise((resolve, reject) => {
 
-        const platform = process.platform; // 'win32', 'darwin', 'linux'
+        // Step 1: show the dialog
+        dialog.showMessageBox({
+            type: 'info',
+            buttons: ['OK'],
+            defaultId: 0,
+            title: 'Installation',
+            message: 'Dependencies will be installed before Firefly starts.  This may take a while, but this step should only be required once.',
+            detail: 'Click OK to continue.'
+        })
+        .then(() => {
 
-        let scriptPath, cmd, args;
+            const platform = process.platform; // 'win32', 'darwin', 'linux'
 
-        if (platform === "win32") {
-            scriptPath = path.join(resourcePath, "scripts", "prepare.ps1");
-            if (!fs.existsSync(scriptPath)) {
-                console.error(`Windows prepare script not found: ${scriptPath}`);
-                reject(new Error(`Windows prepare script not found: ${scriptPath}`));
+            let scriptPath, cmd, args;
+
+            if (platform === "win32") {
+                scriptPath = path.join(resourcePath, "scripts", "prepare.ps1");
+                if (!fs.existsSync(scriptPath)) {
+                    console.error(`Windows prepare script not found: ${scriptPath}`);
+                    reject(new Error(`Windows prepare script not found: ${scriptPath}`));
+                }
+                cmd = "powershell.exe";
+                args = ["-ExecutionPolicy", "Bypass", "-File", scriptPath, resourcePath];
+
+            } else {
+                scriptPath = path.join(resourcePath, "scripts", "prepare.sh");
+                if (!fs.existsSync(scriptPath)) {
+                    console.error(`Unix prepare script not found: ${scriptPath}`);
+                    reject(new Error(`Unix prepare script not found: ${scriptPath}`));
+                }
+                cmd = "bash";
+                args = [scriptPath, resourcePath];
             }
-            cmd = "powershell.exe";
-            args = ["-ExecutionPolicy", "Bypass", "-File", scriptPath, resourcePath];
 
-        } else {
-            scriptPath = path.join(resourcePath, "scripts", "prepare.sh");
-            if (!fs.existsSync(scriptPath)) {
-                console.error(`Unix prepare script not found: ${scriptPath}`);
-                reject(new Error(`Unix prepare script not found: ${scriptPath}`));
-            }
-            cmd = "bash";
-            args = [scriptPath, resourcePath];
-        }
+            console.log(`Running prepare script: ${cmd} ${args.join(" ")}`);
 
-        console.log(`Running prepare script: ${cmd} ${args.join(" ")}`);
-
-        const child = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'] });
+            const child = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'] });
 
 
-        child.stdout.on("data", (data) => {
-            const text = data.toString();
-            console.log(text)
-            // Only send lines that start with "==="
-            text.split("\n").forEach(line => {
-                if (line.startsWith("===")) {
-                    splash.webContents.send("update-splash-progress", line);
+            child.stdout.on("data", (data) => {
+                const text = data.toString();
+                console.log(text)
+                // Only send lines that start with "==="
+                text.split("\n").forEach(line => {
+                    if (line.startsWith("===")) {
+                        splash.webContents.send("update-splash-progress", line);
+                    }
+                });
+            });
+
+
+            child.on("close", (code) => {
+                if (code === 0) {
+                    console.log("Prepare script completed successfully.");
+                    // Create the flag file to mark it as done
+                    fs.writeFileSync(flagFile, "done");
+                    return resolve();
+                } else {
+                    console.error(`Prepare script exited with code ${code}`);
+                    reject(new Error(`Prepare script exited with code ${code}`));
                 }
             });
-        });
-
-
-        child.on("close", (code) => {
-            if (code === 0) {
-                console.log("Prepare script completed successfully.");
-                // Create the flag file to mark it as done
-                fs.writeFileSync(flagFile, "done");
-                return resolve();
-            } else {
-                console.error(`Prepare script exited with code ${code}`);
-                reject(new Error(`Prepare script exited with code ${code}`));
-            }
         });
     });
 
