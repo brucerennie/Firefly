@@ -93,6 +93,9 @@ jobs:
             if compgen -G "dist/*.dmg" > /dev/null; then
               mv dist/*.dmg build/${APP}-mac-x64.dmg
             fi
+            if compgen -G "dist/*.pkg" > /dev/null; then
+              mv dist/*.pkg build/${APP}-mac-x64.pkg
+            fi
           fi
         working-directory: electron-app
 
