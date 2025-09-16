@@ -81,7 +81,6 @@ if [[ "$FULL_INSTALL" == 1 ]]; then
         # Windows installation
         WIN_TARGET_DIR=$(cygpath -w "$(pwd)/$PYTHON_DIR")
         echo "=== Installing Miniforge to $WIN_TARGET_DIR "
-        echo "=== (this may take a while)..."
 
         # Start installer in background
         ./"$MINIFORGE_INSTALLER" //S //InstallationType=JustMe //RegisterPython=0 //AddToPath=0 /D="$WIN_TARGET_DIR" &
@@ -163,7 +162,7 @@ if [[ "$FULL_INSTALL" == 1 ]]; then
     echo "=== Upgrading pip..."
     "$PYTHON_BIN" -m pip install --upgrade pip --no-warn-script-location --no-cache-dir --prefer-binary
 
-    echo "=== Installing Firefly and dependencies (this may a while)..."
+    echo "=== Installing Firefly and dependencies ..."
     "$PYTHON_BIN" -m pip install --force-reinstall firefly jupyter jupyterlab --no-warn-script-location --no-cache-dir --prefer-binary
     "$PYTHON_BIN" -m jupyter lab build --dev-build=False --minimize=True
 

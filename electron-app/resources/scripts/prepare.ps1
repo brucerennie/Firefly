@@ -57,7 +57,7 @@ Invoke-WebRequest -Uri $MINIFORGE_INSTALLER_URL -OutFile $MINIFORGE_INSTALLER
 
 # Install Miniforge silently
 $WIN_TARGET_DIR = (Resolve-Path $PYTHON_DIR).Path
-Write-Host "=== Installing Miniforge to $WIN_TARGET_DIR (this may a while)..."
+Write-Host "=== Installing Miniforge to $WIN_TARGET_DIR ..."
 
 $InstallerProcess = Start-Process -FilePath ".\$MINIFORGE_INSTALLER" -ArgumentList "/S /InstallationType=JustMe /RegisterPython=0 /AddToPath=0 /D=$WIN_TARGET_DIR" -PassThru
 Write-Host "Installation started (PID: $($InstallerProcess.Id)), monitoring progress..."
@@ -111,7 +111,7 @@ Write-Host "=== Using Python: $PYTHON_BIN"
 Write-Host "=== Upgrading pip..."
 & $PYTHON_BIN -m pip install --upgrade pip --no-warn-script-location --no-cache-dir --prefer-binary
 
-Write-Host "=== Installing Firefly and dependencies (this may a while)..."
+Write-Host "=== Installing Firefly and dependencies ..."
 & $PYTHON_BIN -m pip install --force-reinstall firefly jupyter jupyterlab --no-warn-script-location --no-cache-dir --prefer-binary
 & $PYTHON_BIN -m jupyter lab build --dev-build=False --minimize=True
 
