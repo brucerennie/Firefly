@@ -28,7 +28,7 @@ function runPrepareAsync(splash) {
             buttons: ['OK'],
             defaultId: 0,
             title: 'Installation',
-            message: 'Dependencies will be installed before Firefly starts.  This may take a while, but this step should only be required once.',
+            message: `Prior to launching Firefly for the first time, dependencies will be installed in:\n${bundlePath}\nThis may take a while, but this step should only be required once.`,
             detail: 'Click OK to continue.'
         })
         .then(() => {
