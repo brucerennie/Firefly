@@ -5,6 +5,7 @@ recursive-include src/firefly/static/lib *
 recursive-include src/firefly/static/shaders *
 recursive-include src/firefly/static/textures *
 
+recursive-exclude src/firefly/static/data *
 include src/firefly/static/data/startup.json
 
 recursive-include src/firefly/templates *
